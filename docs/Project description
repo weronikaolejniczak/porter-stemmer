@@ -1,0 +1,7 @@
+Porter stemmer
+Implement Porter stemming algorithm for a language of your choice. For a word given on input, the program should return:
+its stem, the list of steps done by the algorithm, the part of speech (if available).
+
+Basic number of points: 100
+
+Maximum number of points: 200
