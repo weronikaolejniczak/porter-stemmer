@@ -1,6 +1,6 @@
-import pandas as pd
 import re
 import tools
+import pandas as pd
 
 # FILENAME = "tests/test1.txt"
 # FILENAME = "tests/test2.txt"
@@ -87,12 +87,17 @@ def main():
                 difference = "None"
 
             # line to write to the csv file
-            line = token + "," + stem + "," + difference + "," + str(len(stemmer.steps)) + "," + stemmer.part_of_speech
+            line = token + "," + \
+                   stem + "," + \
+                   difference + "," + \
+                   str(len(stemmer.steps) - 1) + "," + \
+                   " or ".join(stemmer.part_of_speech)
 
             # write to the csv file
             write_to_csv(CSV_FILE, line)
         else:
-            line = token + "," + token + ",None,None,Not available"
+            stemmer.clear()
+            line = token + "," + token + ",None,None," + " or ".join(stemmer.set_pos(token))
             write_to_csv(CSV_FILE, line)
 
     print("_______________________________________________________________")

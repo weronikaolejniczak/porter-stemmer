@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name='porterstemmer',
     version='0.1',
-    packages=[''],
+    packages=['pandas'],
     package_dir={'': 'porter stemmer'},
     url='https://github.com/weronikaolejniczak/porterstemmer',
     license='MIT',

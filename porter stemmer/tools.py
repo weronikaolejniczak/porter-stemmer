@@ -1,10 +1,13 @@
+import re
+
+
 class PorterStemmer:
 
     def __init__(self):
         self.word = ""  # holds a word to be stemmed
         self.buffer = []
         self.steps = []
-        self.part_of_speech = ""
+        self.part_of_speech = []
         self.first = 0
         self.last = 0
         self.j = 0  # offset into the string
@@ -12,7 +15,7 @@ class PorterStemmer:
     def clear(self):
         self.buffer = []
         self.steps = []
-        self.part_of_speech = ""
+        self.part_of_speech = []
         self.first = 0
         self.last = 0
         self.j = 0  # offset into the string
@@ -125,6 +128,7 @@ class PorterStemmer:
 
         self.j = self.last - length
         step = "Remove ending -" + string + "."
+
         self.steps.append(step)
 
         return 1
@@ -147,6 +151,91 @@ class PorterStemmer:
     def r(self, string):
         if self.measure_clusters() > 0:
             self.set_to(string)
+
+    def set_pos(self, word):
+        """
+        Adjective
+        suffixes: -ible, -ed, -ent, -al, -ical, -ing, -ant
+
+        Noun
+        suffixes: -ment, -tion, -ence, -ation, -is, -ity, -ant, -ance, -ity
+
+        Verb
+        suffixes: -ist, -ate, -ize
+
+        Adverbs: -ly
+
+        Preposition: about, above, across, after, against, ahead, along, amidst, among,
+        around, as, at, barring, without, before, because, behind, below, beneath, beside,
+        besides, between, beyond, by, concerning, despite, down, during, in, plus, within,
+        next, inside, into, except, excluding, for, following, from, like, minus, near,
+        outside, over, past, per, round, since, off, on, onto, opposite, out, than,
+        through, throughout, till, times, to, toward, towards, under, underneath, unlike,
+        until, unto, up, upon, via, with
+
+        Pronoun:
+            1st person: I, me, my, mine, myself
+            2nd person: you, your, yours, yourself
+            3rd person: he, him, his, himself
+                        she, her, hers, herself
+                        it, its, itself
+            1st person: we, our, ours, ourselves
+            2nd person: you, your, yours, yourselves
+            3rd person: they, them, their, theirs, themselves
+
+        Conjunction:
+            coordinating: for, and, nor, but, or, yet, so
+            subordinating: after, although, as, because, before, when, where, wherever,
+            if, since, than, though, unless, until, whenever, whereas, while
+            correlative: either, neither, both, whether, just, the, rather
+        """
+
+        adj_pattern = \
+            "\w*ible$|\w*able$|\w*ed$|\w*ent$|\w*al$|\w*ical$|\w*ing$|\w*ant$"
+        noun_pattern = \
+            "\w*ment$|\w*tion$|\w*ence$|\w*ation$|\w*is$|\w*ity$|\w*ant$|\w*ance$|\w*s$"
+        verb_pattern = \
+            "\w*ing$|\w*ed$|\w*ate$|\w*ize$|\w*ise$|\w*s$|^am$"
+        adverb_pattern = "\w*ly$"
+        prep_pattern = \
+            "^about$|^above$|^across$|^after$|^against$|^ahead$|^along$|^amidst$|^among$" \
+            "|^around$|^as$|^at$|^barring$|^without$|^before$|^because$|^behind$|^below$" \
+            "|^beneath$|^beside$|^besides$|^between$|^beyond$|^by$|^concerning$|^despite$" \
+            "|^down$|^during$|^in$|^plus$|^within$|^next$|^inside$|^into$|^except$|^excluding$" \
+            "|^for$|^following$|^from$|^like$|^minus$|^near$|^outside$|^over$|^past$|^per$" \
+            "|^round$|^since$|^off$|^on$|^onto$|^opposite$|^out$|^than$|^through$|^throughout$" \
+            "|^till$|^times$|^to$|^toward$|^towards$|^under$|^underneath$|^unlike$|^unto$" \
+            "|^until$|^unto$|^up$|^upon$|^via$|^with$"
+        pronoun_pattern = \
+            "^i$|^me$|^my$|^mine$|^myself$|" \
+            "^you$|^your$|^yours$|^yourself$|^yourselves$|" \
+            "^she$|^her$|^hers$|^herself$|" \
+            "^he$|^him$|^his$|^himself$|" \
+            "^it$|^its$|^itself$|" \
+            "^we$|^our$|^ours$|^ourselves$|" \
+            "^they$|^them$|^their$|^theirs$|^themselves$"
+        conj_pattern = "^for|^and$|^nor$|^but$|^or$|^yet$|^so$" \
+                       "|^after$|^although$|^as$|^because$|^before$|^when$|^where$" \
+                       "|^wherever$|^if$|^since$|^than$|^though$|^unless$|^until$" \
+                       "|^whenever$|^whereas$|^while$|^either$|^neither$|^both$" \
+                       "|^whether$|^just$|^the$|^rather$"
+
+        if re.match(adj_pattern, word):
+            self.part_of_speech.append("adj")
+        if re.match(noun_pattern, word):
+            self.part_of_speech.append("noun")
+        if re.match(verb_pattern, word):
+            self.part_of_speech.append("verb")
+        if re.match(adverb_pattern, word):
+            self.part_of_speech.append("adverb")
+        if re.match(prep_pattern, word):
+            self.part_of_speech.append("prepos")
+        if re.match(pronoun_pattern, word):
+            self.part_of_speech.append("pronoun")
+        if re.match(conj_pattern, word):
+            self.part_of_speech.append("conj+")
+
+        return self.part_of_speech
 
     # PORTER ALGORITHM STEPS
 
@@ -415,6 +504,8 @@ class PorterStemmer:
         self.step6()
 
         self.steps.append("Result: " + "".join(self.buffer[self.first:(self.last + 1)]))
+
+        self.set_pos(self.word)
 
         if len(self.steps) > 0:
             for step in self.steps:
