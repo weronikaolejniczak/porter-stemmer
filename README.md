@@ -7,10 +7,6 @@ its stem, the list of steps done by the algorithm, the part of speech (if availa
 
 Fork and download the repository.
 
-## Usage
-
-(...)
-
 ## Contributors
 
 Weronika Olejniczak at [weronikaolejniczak](https://github.com/weronikaolejniczak)
